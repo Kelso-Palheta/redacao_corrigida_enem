@@ -60,13 +60,13 @@ export async function POST(request: Request) {
       return null;
     };
 
-    const scores = extractScore(result);
+    const scores = result ? extractScore(result) : null;
 
     const id = await saveCorrection({
       studentName,
       studentClass,
       essayTheme,
-      result,
+      result: result || '',
       scoreData: scores?.items || [],
       totalScore: scores?.total || 0,
     });
