@@ -2,13 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateCorrection } from '@/lib/ai-provider';
 import { saveCorrection } from '@/lib/storage';
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};
+
 
 export async function POST(request: Request) {
   try {
