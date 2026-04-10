@@ -35,7 +35,7 @@ export function Sidebar() {
   }
 
   const menuItems = [
-    { name: 'Nova Correção', icon: History, href: '/professor' },
+    { name: 'Nova Correção', icon: History, href: '/professor?new=1' },
     { name: 'Meu Desempenho', icon: LayoutDashboard, href: '/professor/desempenho' },
     { name: 'Critérios Inep', icon: BookOpen, href: '/criterios' },
   ];

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -86,6 +87,9 @@ export default function ProfessorPage() {
     );
   };
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const handleReset = () => {
     setStep('input');
     setResult(null);
@@ -96,6 +100,15 @@ export default function ProfessorPage() {
     setImageBase64(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  // Detecta ?new=1 na URL e reseta o estado
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      handleReset();
+      router.replace('/professor');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     let file = e.target.files?.[0];
