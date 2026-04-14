@@ -55,11 +55,15 @@ export async function saveCorrection(data: Omit<Correction, 'id' | 'createdAt'>)
   }
 
   // Prioridade 2: Local JSON
-  await ensureFile();
-  const fileContent = await fs.readFile(DATA_PATH, 'utf-8');
-  const currentData = JSON.parse(fileContent || '[]');
-  currentData.push(newCorrection);
-  await fs.writeFile(DATA_PATH, JSON.stringify(currentData, null, 2));
+  try {
+    await ensureFile();
+    const fileContent = await fs.readFile(DATA_PATH, 'utf-8');
+    const currentData = JSON.parse(fileContent || '[]');
+    currentData.push(newCorrection);
+    await fs.writeFile(DATA_PATH, JSON.stringify(currentData, null, 2));
+  } catch (error) {
+    console.warn("Aviso: Falha ao salvar no backup local (Comum em ambientes cloud read-only como Vercel). O ID será retornado sem persistência.");
+  }
   
   return id;
 }

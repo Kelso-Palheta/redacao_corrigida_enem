@@ -4,6 +4,8 @@ import { saveCorrection } from '@/lib/storage';
 
 
 
+export const maxDuration = 60; // Limite máximo da Vercel Hobby para IAs
+
 export async function POST(request: Request) {
   try {
     const { 
@@ -65,9 +67,9 @@ export async function POST(request: Request) {
 
     const id = await saveCorrection({
       userId,
-      studentName,
-      studentClass,
-      essayTheme,
+      studentName: studentName || 'Estudante',
+      studentClass: studentClass || 'N/A',
+      essayTheme: essayTheme || 'Geral',
       result: result || '',
       scoreData: scores?.items || [],
       totalScore: scores?.total || 0,
@@ -77,7 +79,7 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('❌ ERRO CRÍTICO NA API DE CORREÇÃO:', error);
     return NextResponse.json(
-      { error: 'Não foi possível realizar a correção no momento.' },
+      { error: `Não foi possível realizar a correção no momento. Detalhe: ${error.message || 'Erro Desconhecido'}` },
       { status: 500 }
     );
   }
