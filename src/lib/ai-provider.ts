@@ -124,7 +124,7 @@ export async function extractTextOnly(imageBase64: string, mediaType: string = "
         baseURL: "https://chat.maritaca.ai/api" 
       });
       const response = await maritaca.chat.completions.create({
-        model: process.env.MARITACA_MODEL || "sabia-4",
+        model: process.env.MARITACA_MODEL || "sabiazinho-4",
         messages: [{
           role: "user",
           content: [
@@ -143,7 +143,7 @@ export async function extractTextOnly(imageBase64: string, mediaType: string = "
 }
 
 async function handleMaritaca(maritaca: OpenAI, text?: string, imageBase64?: string, mediaType: string = "image/jpeg", prompt: string = MASTER_ENEM_PROMPT) {
-  const model = process.env.MARITACA_MODEL || "sabia-4";
+  const model = process.env.MARITACA_MODEL || "sabiazinho-4";
   const content: any[] = [];
 
   if (imageBase64) {
