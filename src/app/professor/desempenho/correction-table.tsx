@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 import { 
   Search, 
   Calendar, 
-  ArrowRight
+  ArrowRight,
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,6 +16,7 @@ interface CorrectionTableProps {
 
 export default function CorrectionTable({ corrections }: CorrectionTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const filteredCorrections = corrections.filter(c => 
     c.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -21,6 +24,37 @@ export default function CorrectionTable({ corrections }: CorrectionTableProps) {
     c.essayTheme.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta correção?')) return;
+
+    setDeletingId(id);
+    try {
+      const userJson = localStorage.getItem('prof_user');
+      if (!userJson) throw new Error('Usuário não logado');
+      const user = JSON.parse(userJson);
+
+      const res = await fetch(`/api/correcao/excluir/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId: user.id })
+      });
+
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao excluir correção.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao excluir correção.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <>
@@ -46,7 +80,7 @@ export default function CorrectionTable({ corrections }: CorrectionTableProps) {
               <th className="px-6 py-4">Tema</th>
               <th className="px-6 py-4">Nota</th>
               <th className="px-6 py-4">ID de Acesso</th>
-              <th className="px-8 py-4 text-right">Ação</th>
+              <th className="px-8 py-4 text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -85,12 +119,23 @@ export default function CorrectionTable({ corrections }: CorrectionTableProps) {
                     </span>
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <Link 
-                      href={`/aluno/${c.id}`} 
-                      className="p-2 inline-flex items-center justify-center bg-white/5 hover:bg-violet-600/20 hover:text-violet-400 text-neutral-500 rounded-lg transition-all"
-                    >
-                      <ArrowRight size={18} />
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => handleDelete(c.id)}
+                        disabled={deletingId === c.id}
+                        className="p-2 inline-flex items-center justify-center bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-neutral-500 rounded-lg transition-all disabled:opacity-50"
+                        title="Excluir"
+                      >
+                        {deletingId === c.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+                      </button>
+                      <Link 
+                        href={`/aluno/${c.id}?from=professor`} 
+                        className="p-2 inline-flex items-center justify-center bg-white/5 hover:bg-violet-600/20 hover:text-violet-400 text-neutral-500 rounded-lg transition-all"
+                        title="Ver Detalhes"
+                      >
+                        <ArrowRight size={18} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))

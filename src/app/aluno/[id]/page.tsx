@@ -37,6 +37,8 @@ interface Correction {
 
 export default function StudentResultPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const from = searchParams.get('from');
   const correctionId = params.id as string;
   const [correction, setCorrection] = useState<Correction | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,6 +97,9 @@ export default function StudentResultPage() {
     });
   };
 
+  const backLink = from === 'professor' ? '/professor/desempenho' : '/aluno';
+  const backText = from === 'professor' ? 'Voltar ao Painel' : 'Voltar ao Portal';
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center py-20">
@@ -139,8 +144,8 @@ export default function StudentResultPage() {
             <p className="mt-3 text-neutral-300 font-medium italic">&quot;{correction.essayTheme}&quot;</p>
           </div>
         </div>
-        <Link href="/aluno" className="group flex items-center gap-2 px-6 py-3 glass rounded-2xl text-sm font-bold hover:bg-white/5 transition-all text-neutral-400">
-          <ArrowLeft size={16} /> Voltar
+        <Link href={backLink} className="group flex items-center gap-2 px-6 py-3 glass rounded-2xl text-sm font-bold hover:bg-white/5 transition-all text-neutral-400">
+          <ArrowLeft size={16} /> {backText}
         </Link>
       </div>
 

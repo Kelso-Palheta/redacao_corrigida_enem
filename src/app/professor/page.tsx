@@ -171,6 +171,16 @@ export default function ProfessorPage() {
   const handleAvaliar = async () => {
     if (!text) return;
     setIsLoading(true);
+    // Obter userId do localStorage
+    let userId = undefined;
+    try {
+      const userJson = localStorage.getItem('prof_user');
+      if (userJson) {
+        const user = JSON.parse(userJson);
+        userId = user.id;
+      }
+    } catch (e) {}
+
     try {
       const res = await fetch('/api/corrigir', {
         method: 'POST',
@@ -181,7 +191,8 @@ export default function ProfessorPage() {
           studentClass,
           essayTheme,
           depth,
-          competencies: selectedCompetencies.join(', ')
+          competencies: selectedCompetencies.join(', '),
+          userId
         })
       });
       const data = await res.json();

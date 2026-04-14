@@ -13,7 +13,8 @@ export async function POST(request: Request) {
       studentClass, 
       essayTheme, 
       depth, 
-      competencies 
+      competencies,
+      userId
     } = await request.json();
 
     if (!text && !imageBase64) {
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
     const scores = result ? extractScore(result) : null;
 
     const id = await saveCorrection({
+      userId,
       studentName,
       studentClass,
       essayTheme,
