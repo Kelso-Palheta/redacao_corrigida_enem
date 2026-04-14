@@ -6,7 +6,7 @@ import { ShieldCheck, Lock, Loader2, ArrowRight, Mail, User, UserPlus } from 'lu
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProfessorLoginPage() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'recovery'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,10 +35,29 @@ export default function ProfessorLoginPage() {
           return;
         }
         setSuccess('Conta criada! Fazendo login...');
-        // Auto-login após registro
         localStorage.setItem('prof_auth', 'true');
         localStorage.setItem('prof_user', JSON.stringify(data.user));
         setTimeout(() => router.push('/professor'), 1000);
+      } else if (mode === 'recovery') {
+        const res = await fetch('/api/auth/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, newPassword: password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error);
+          setIsLoading(false);
+          return;
+        }
+        setSuccess('Senha redefinida com sucesso!');
+        setTimeout(() => {
+          setMode('login');
+          setPassword('');
+          setSuccess('');
+          setIsLoading(false);
+        }, 2000);
+        return; // Early return to avoid setIsLoading(false) from running below prematurely
       } else {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
@@ -57,8 +76,8 @@ export default function ProfessorLoginPage() {
       }
     } catch {
       setError('Erro de conexão. Tente novamente.');
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const switchMode = () => {
@@ -66,6 +85,7 @@ export default function ProfessorLoginPage() {
     setError('');
     setSuccess('');
   };
+
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center py-12 px-4">
@@ -85,9 +105,9 @@ export default function ProfessorLoginPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <h2 className="text-3xl font-bold">{mode === 'login' ? 'Entrar' : 'Criar Conta'}</h2>
+              <h2 className="text-3xl font-bold">{mode === 'login' ? 'Entrar' : mode === 'register' ? 'Criar Conta' : 'Recuperar Senha'}</h2>
               <p className="text-neutral-400 text-sm font-medium">
-                {mode === 'login' ? 'Acesse o Painel do Professor.' : 'Cadastre-se para começar a corrigir.'}
+                {mode === 'login' ? 'Acesse o Painel do Professor.' : mode === 'register' ? 'Cadastre-se para começar a corrigir.' : 'Defina uma nova senha de acesso.'}
               </p>
             </motion.div>
           </AnimatePresence>
@@ -142,10 +162,10 @@ export default function ProfessorLoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={mode === 'register' ? 'Crie uma senha (mín. 6 caracteres)' : 'Sua senha'}
+              placeholder={mode === 'register' ? 'Crie uma senha (mín. 6 caracteres)' : mode === 'recovery' ? 'Nova senha (mín. 6 caracteres)' : 'Sua senha'}
               className="block w-full pl-12 pr-4 py-4 bg-neutral-900 border border-white/5 rounded-2xl focus:border-violet-500/50 outline-none transition-all text-white"
               required
-              minLength={mode === 'register' ? 6 : undefined}
+              minLength={mode !== 'login' ? 6 : undefined}
             />
           </div>
 
@@ -178,22 +198,36 @@ export default function ProfessorLoginPage() {
               <Loader2 className="animate-spin" size={20} />
             ) : mode === 'login' ? (
               'Entrar no Painel'
-            ) : (
+            ) : mode === 'register' ? (
               'Criar Minha Conta'
+            ) : (
+              'Redefinir Senha'
             )}
             {!isLoading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
           </button>
         </form>
 
-        <div className="text-center">
+        <div className="text-center space-y-4 flex flex-col items-center">
+          {mode === 'login' && (
+            <button
+              type="button"
+              onClick={() => { setMode('recovery'); setError(''); setSuccess(''); }}
+              className="text-xs text-neutral-500 hover:text-white transition-colors"
+            >
+              Esqueceu sua senha?
+            </button>
+          )}
           <button
+            type="button"
             onClick={switchMode}
-            className="text-sm text-neutral-500 hover:text-violet-400 transition-colors font-medium"
+            className="text-sm text-neutral-500 hover:text-violet-400 transition-colors font-medium mt-2"
           >
             {mode === 'login' ? (
               <>Ainda não tem conta? <span className="text-violet-400 font-bold">Cadastre-se</span></>
-            ) : (
+            ) : mode === 'register' ? (
               <>Já tem conta? <span className="text-violet-400 font-bold">Faça login</span></>
+            ) : (
+              <>Lembrou a senha? <span className="text-violet-400 font-bold">Voltar ao login</span></>
             )}
           </button>
         </div>
