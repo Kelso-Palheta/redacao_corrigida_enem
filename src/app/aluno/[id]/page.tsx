@@ -12,7 +12,7 @@ import {
   Loader2
 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { generatePDF } from '@/lib/pdf-generator';
 import { 
   Radar, 
